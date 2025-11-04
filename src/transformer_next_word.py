@@ -1,4 +1,4 @@
-"""Entry point for training and evaluating a Transformer next-word prediction model."""  # Module docstring describing the purpose of this script.  # Inline comment added for clarity.
+"""Entry point for training and evaluating a Transformer next-word prediction model."""  # Module docstring describing the purpose of this script.
 import math  # Import math for square root operations in learning rate scheduling.
 import random  # Import random for deterministic shuffling of data.
 from typing import Dict, List, Tuple  # Import typing helpers for type annotations.
@@ -7,11 +7,11 @@ from torch import nn  # Import neural network modules from PyTorch.
 from torch.optim import AdamW  # Import AdamW optimizer for stable training.
 from torch.utils.data import DataLoader, Dataset  # Import dataset utilities for batching.
 def set_seed(seed: int) -> None:  # Define a utility to set deterministic seeds.
-    """Seed all random number generators for reproducibility."""  # Provide a concise docstring for this helper.  # Inline comment added for clarity.
+    """Seed all random number generators for reproducibility."""  # Provide a concise docstring for this helper.
     random.seed(seed)  # Seed the Python random module for reproducible shuffles.
     torch.manual_seed(seed)  # Seed PyTorch for deterministic behavior on CPU.
 class Vocabulary:  # Define a simple vocabulary to map words to indices.
-    """A minimal vocabulary supporting token-to-index conversions."""  # Describe the purpose of the class.  # Inline comment added for clarity.
+    """A minimal vocabulary supporting token-to-index conversions."""  # Describe the purpose of the class.
     def __init__(self) -> None:  # Initialize the vocabulary data structures.
         self.token_to_index: Dict[str, int] = {}  # Dictionary mapping tokens to integer indices.
         self.index_to_token: List[str] = []  # List storing tokens by index position.
@@ -28,7 +28,7 @@ class Vocabulary:  # Define a simple vocabulary to map words to indices.
     def __len__(self) -> int:  # Provide the vocabulary size when len() is called.
         return len(self.index_to_token)  # Return the total number of tracked tokens.
 class NextWordDataset(Dataset):  # Create a dataset for next-word prediction.
-    """Dataset producing input and target sequences for language modeling."""  # Explain the dataset role.  # Inline comment added for clarity.
+    """Dataset producing input and target sequences for language modeling."""  # Explain the dataset role.
     def __init__(self, sequences: List[List[int]], context_length: int) -> None:  # Initialize with tokenized sequences.
         self.samples: List[Tuple[List[int], int]] = []  # Prepare storage for context-target pairs.
         for sequence in sequences:  # Iterate over each tokenized sentence.
@@ -44,7 +44,7 @@ class NextWordDataset(Dataset):  # Create a dataset for next-word prediction.
         context, target = self.samples[index]  # Unpack the stored context and target.
         return torch.tensor(context, dtype=torch.long), torch.tensor(target, dtype=torch.long)  # Convert to tensors for PyTorch.
 class PositionalEncoding(nn.Module):  # Implement sinusoidal positional encoding for sequence order information.
-    """Sinusoidal positional encoding compatible with Transformer inputs."""  # Describe the encoding purpose.  # Inline comment added for clarity.
+    """Sinusoidal positional encoding compatible with Transformer inputs."""  # Describe the encoding purpose.
     def __init__(self, embedding_dim: int, max_length: int = 5000) -> None:  # Initialize with embedding dimension and maximum length.
         super().__init__()  # Initialize the nn.Module superclass.
         position = torch.arange(0, max_length, dtype=torch.float).unsqueeze(1)  # Create a column vector of positions.
@@ -56,26 +56,26 @@ class PositionalEncoding(nn.Module):  # Implement sinusoidal positional encoding
     def forward(self, x: torch.Tensor) -> torch.Tensor:  # Apply positional encoding to input embeddings.
         return x + self.pe[:, : x.size(1)]  # Add positional encoding to match the input sequence length.
 class TransformerLanguageModel(nn.Module):  # Define the Transformer model for next-word prediction.
-    """Transformer-based language model predicting next tokens."""  # Describe the model capability.  # Inline comment added for clarity.
-    def __init__(  # Inline comment added for clarity.
-        self,  # Inline comment added for clarity.
-        vocab_size: int,  # Inline comment added for clarity.
-        embedding_dim: int,  # Inline comment added for clarity.
-        num_heads: int,  # Inline comment added for clarity.
-        num_layers: int,  # Inline comment added for clarity.
-        feedforward_dim: int,  # Inline comment added for clarity.
-        dropout: float,  # Inline comment added for clarity.
-        context_length: int,  # Inline comment added for clarity.
+    """Transformer-based language model predicting next tokens."""  # Describe the model capability.
+    def __init__(
+        self,
+        vocab_size: int,
+        embedding_dim: int,
+        num_heads: int,
+        num_layers: int,
+        feedforward_dim: int,
+        dropout: float,
+        context_length: int,
     ) -> None:  # Initialize the Transformer with configurable hyperparameters.
         super().__init__()  # Initialize the nn.Module superclass.
         self.embedding = nn.Embedding(vocab_size, embedding_dim)  # Create an embedding layer converting tokens to vectors.
         self.positional_encoding = PositionalEncoding(embedding_dim, max_length=context_length)  # Instantiate positional encoding for the context length.
-        encoder_layer = nn.TransformerEncoderLayer(  # Inline comment added for clarity.
-            d_model=embedding_dim,  # Inline comment added for clarity.
-            nhead=num_heads,  # Inline comment added for clarity.
-            dim_feedforward=feedforward_dim,  # Inline comment added for clarity.
-            dropout=dropout,  # Inline comment added for clarity.
-            batch_first=True,  # Inline comment added for clarity.
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=embedding_dim,
+            nhead=num_heads,
+            dim_feedforward=feedforward_dim,
+            dropout=dropout,
+            batch_first=True,
         )  # Configure a single Transformer encoder layer with the provided settings.
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)  # Stack multiple encoder layers.
         self.output_layer = nn.Linear(embedding_dim, vocab_size)  # Map encoder outputs to vocabulary logits.
@@ -114,30 +114,30 @@ def generate_next_word(model: TransformerLanguageModel, prompt: str, vocab: Voca
 def train_model() -> None:  # Main training routine orchestrating data preparation, training, and evaluation.
     set_seed(42)  # Ensure reproducibility across runs.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # Select GPU if available, otherwise CPU.
-    corpus = [  # Inline comment added for clarity.
-        "deep learning models transform data into insights",  # Inline comment added for clarity.
-        "transformers excel at capturing long range dependencies",  # Inline comment added for clarity.
-        "neural networks can approximate complex functions",  # Inline comment added for clarity.
-        "attention mechanisms help models focus on relevant information",  # Inline comment added for clarity.
-        "language models predict the next word in a sentence",  # Inline comment added for clarity.
-        "training data quality influences model performance",  # Inline comment added for clarity.
-        "gradient descent optimizes neural network parameters",  # Inline comment added for clarity.
-        "interview preparation benefits from clear reference projects",  # Inline comment added for clarity.
-        "pytorch provides flexible tools for building models",  # Inline comment added for clarity.
-        "researchers continue improving transformer architectures",  # Inline comment added for clarity.
+    corpus = [
+        "deep learning models transform data into insights",
+        "transformers excel at capturing long range dependencies",
+        "neural networks can approximate complex functions",
+        "attention mechanisms help models focus on relevant information",
+        "language models predict the next word in a sentence",
+        "training data quality influences model performance",
+        "gradient descent optimizes neural network parameters",
+        "model documentation improves knowledge transfer across teams",
+        "pytorch provides flexible tools for building models",
+        "researchers continue improving transformer architectures",
     ]  # Define a small illustrative corpus of domain-relevant sentences.
     context_length = 4  # Specify the number of tokens used as context for prediction.
     vocab, tokenized_sequences = build_vocabulary(corpus)  # Build vocabulary and tokenize the corpus.
     dataset = NextWordDataset(tokenized_sequences, context_length=context_length)  # Create a dataset for language modeling.
     dataloader = DataLoader(dataset, batch_size=16, shuffle=True, collate_fn=collate_batch)  # Prepare a data loader for batching and shuffling.
-    model = TransformerLanguageModel(  # Inline comment added for clarity.
-        vocab_size=len(vocab),  # Inline comment added for clarity.
-        embedding_dim=64,  # Inline comment added for clarity.
-        num_heads=4,  # Inline comment added for clarity.
-        num_layers=2,  # Inline comment added for clarity.
-        feedforward_dim=128,  # Inline comment added for clarity.
-        dropout=0.1,  # Inline comment added for clarity.
-        context_length=context_length,  # Inline comment added for clarity.
+    model = TransformerLanguageModel(
+        vocab_size=len(vocab),
+        embedding_dim=64,
+        num_heads=4,
+        num_layers=2,
+        feedforward_dim=128,
+        dropout=0.1,
+        context_length=context_length,
     ).to(device)  # Instantiate the Transformer model with reasonable hyperparameters.
     criterion = nn.CrossEntropyLoss()  # Use cross-entropy loss for classification over the vocabulary.
     optimizer = AdamW(model.parameters(), lr=2e-3)  # Configure the AdamW optimizer for stable convergence.
